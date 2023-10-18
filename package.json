@@ -2,7 +2,7 @@
   "name": "vecteezy_api",
   "version": "1.0.0",
   "scripts": {
-    "start": "node your-entry-file.js",
+    "start": "node src/api.js",
     "build": "babel src -d dist",
     "build:prod": "babel --source-maps --out-dir dist src"
   },
