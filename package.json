@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "start": "node src/api.js",
-    "build": "babel src -d dist",
-    "build:prod": "babel --source-maps --out-dir dist src"
+    "build": "npx babel src -d dist",
+    "build:prod": "npx babel --source-maps --out-dir dist src"
   },
   "keywords": [],
   "author": "",
