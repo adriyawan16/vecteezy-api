@@ -1,35 +1,27 @@
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
-
-const isAuthorized = (req,res,next) => {
-    const authHeader = req.headers.authorization;
-    if (authHeader === 'ngentot'){
-        next();
-    } else {
-        res.status(401);
-        res.json({msg:'No access'})
-    }
-};
-
+const { scrapeAndCheckImageUrls } = require('./image');
 // Middleware to parse JSON requests
 app.use(bodyParser.json());
 
-app.get('/vecteezy', isAuthorized,async (req, res) => {
+app.get('/vecteezy', async (req, res) => {
     const inputUrl = req.query.inputUrl || req.body.inputUrl || '';
     let successfulResults = [];
 
-    try {
-        const imageUrls = require('./image').generateUrls(inputUrl);
-        const imageResult = await require('./image').checkStatusCodes(imageUrls);
-        successfulResults = imageResult.filter(result => result.status);
-        if (successfulResults.length > 0) {
-            console.log('Result from image.js:', successfulResults);
-            return res.json(successfulResults);
+    if (inputUrl.includes('https://www.vecteezy.com/png/') || inputUrl.includes('https://www.vecteezy.com/photo/')) {
+        try {
+            const imageUrls = await scrapeAndCheckImageUrls(inputUrl);
+            console.log('Modified Image URLs:', imageUrls);
+            successfulResults = imageUrls.filter(result => result.status);
+            if (successfulResults.length > 0) {
+                console.log('Result from image.js:', successfulResults);
+                return res.json(successfulResults);
+            }
+        } catch (error) {
+            console.log('Error processing URLs from image.js:', error);
         }
-    } catch (error) {
-        console.log('Error processing URLs from image.js:', error);
-    }
+    } else {
 
     try {
         const basicUrls = require('./basic').generateUrls(inputUrl);
@@ -78,7 +70,7 @@ app.get('/vecteezy', isAuthorized,async (req, res) => {
     } catch (error) {
         console.log('Error processing URLs from generate3.js:', error);
     }
-
+    }
     console.log('No successful results found');
     return res.status(404).json({ message: 'No successful results found' });
 });
